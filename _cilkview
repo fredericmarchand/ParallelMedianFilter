@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cilkview ./main 30   #<-- edit call and parameters (currently: 30)
+
+
+
