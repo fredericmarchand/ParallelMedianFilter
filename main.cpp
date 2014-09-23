@@ -15,6 +15,9 @@
 using namespace std;
 
 #define DEBUG 0 
+#define DIRECTIONS 8
+
+void findMedianfor(int x, int y, int k);
 
 int m, n, k;
 int **inputArray;
@@ -27,12 +30,13 @@ bool integerSort(int i, int j)
 
 void medianFilter(int x1, int y1, int x2, int y2)
 {
-    if ((x1 == x2-1) && (y1 == y2-1))
+    if ((x2 - x1 == 1) && (y2 - y1 == 1))
     {
-        vector<int> values;
+        findMedianfor(x1, y1, k);
+        /*vector<int> values;
         int tempx, tempy;
         /// Create list of values based on k
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < DIRECTIONS; ++i)
         {
             switch (i)
             {
@@ -43,6 +47,7 @@ void medianFilter(int x1, int y1, int x2, int y2)
                         values.push_back(inputArray[tempx][y1]);
                     }
                     break;
+
                 case 1:
                     for (int j = 1; j <= k; ++j)
                     {
@@ -50,7 +55,24 @@ void medianFilter(int x1, int y1, int x2, int y2)
                         values.push_back(inputArray[x1][tempy]);
                     }
                     break;
+
                 case 2:
+                    for (int j = 1; j <= k; ++j)
+                    {
+                        x1+j > m-1 ? tempx = m-1 : tempx = x1+j;
+                        values.push_back(inputArray[tempx][y1]);
+                    }
+                    break;
+
+                case 3:
+                    for (int j = 1; j <= k; ++j)
+                    {
+                        y1+j > n-1 ? tempy = n-1 : tempy = y1+j;
+                        values.push_back(inputArray[x1][tempy]);
+                    }
+                    break;
+
+                case 4:
                     for (int j = 1; j <= k; ++j)
                     {
                         x1-j < 0 ? tempx = 0 : tempx = x1-j;
@@ -58,20 +80,7 @@ void medianFilter(int x1, int y1, int x2, int y2)
                         values.push_back(inputArray[tempx][tempy]);
                     }
                     break;
-                case 3:
-                    for (int j = 1; j <= k; ++j)
-                    {
-                        x1+j > m-1 ? tempx = m-1 : tempx = x1+j;
-                        values.push_back(inputArray[tempx][y1]);
-                    }
-                    break;
-                case 4:
-                    for (int j = 1; j <= k; ++j)
-                    {
-                        y1+j > n-1 ? tempy = n-1 : tempy = y1+j;
-                        values.push_back(inputArray[x1][tempy]);
-                    }
-                    break;
+
                 case 5:
                     for (int j = 1; j <= k; ++j)
                     {
@@ -80,6 +89,7 @@ void medianFilter(int x1, int y1, int x2, int y2)
                         values.push_back(inputArray[tempx][tempy]);
                     }
                     break;
+
                 case 6:
                     for (int j = 1; j <= k; ++j)
                     {
@@ -88,6 +98,7 @@ void medianFilter(int x1, int y1, int x2, int y2)
                         values.push_back(inputArray[tempx][tempy]);
                     }
                     break;
+
                 case 7:
                     for (int j = 1; j <= k; ++j)
                     {
@@ -101,12 +112,17 @@ void medianFilter(int x1, int y1, int x2, int y2)
 
         /// sort it
         sort(values.begin(), values.end(), integerSort);
-        /// get median and write it in the output inputArray
-        outputArray[y1][x1] = (values.at(k*8/2) + values.at(k*8/2-1)) / 2;
-        for (vector<int>::const_iterator i = values.begin(); i != values.end(); ++i)
+
+        /// get median and write it in the outputArray
+        outputArray[x1][y1] = values.at(k * DIRECTIONS / 2 - 1);
+
+        if (x1 == 15 && y1 == 15)
         {
-            cout << *i << endl;
-        }
+            for (vector<int>::const_iterator i = values.begin(); i != values.end(); ++i)
+            {
+//                cout << *i << endl;
+            }
+        }*/
     }
     else
     {
@@ -114,9 +130,9 @@ void medianFilter(int x1, int y1, int x2, int y2)
 //        cout << "(" << x1 << "," << y1 << ") (" << x2 << "," << y2 << ")\n";
 #endif
         cilk_spawn medianFilter(x1, y1, x2-(x2-x1)/2, y2-(y2-y1)/2); 
-//        cilk_spawn medianFilter(x1+(x2-x1)/2, y1, x2, y2-(y2-y1)/2);
-//        cilk_spawn medianFilter(x1, y1+(y2-y1)/2, x2-(x2-x1)/2, y2);
-//        cilk_spawn medianFilter(x1+(x2-x1)/2, y1+(y2-y1)/2, x2, y2);
+        cilk_spawn medianFilter(x1+(x2-x1)/2, y1, x2, y2-(y2-y1)/2);
+        cilk_spawn medianFilter(x1, y1+(y2-y1)/2, x2-(x2-x1)/2, y2);
+        cilk_spawn medianFilter(x1+(x2-x1)/2, y1+(y2-y1)/2, x2, y2);
         cilk_sync;
     }
 }
@@ -126,7 +142,6 @@ void stringToCharArray(string s, char *a)
     a[s.size()] = 0;
     memcpy(a, s.c_str(), s.size());
 }
-
 
 void printArray()
 {
@@ -140,6 +155,17 @@ void printArray()
     }
 }
 
+void freeMem()
+{
+    /// De-allocate the two dimensional arrays
+    for (int i = 0; i < m; ++i)
+    {
+        delete [] inputArray[i];
+        delete [] outputArray[i];
+    }
+    delete [] inputArray;
+    delete [] outputArray;
+}
 
 int main(int argc, char** argv) 
 {
@@ -204,7 +230,14 @@ int main(int argc, char** argv)
     }
 
     input.close();
-    
+
+    if (m < k || n < k)
+    {
+        cerr << "Value of k is too low, must be greater or equal to m and n" << endl;
+        freeMem();
+        return 1;
+    }
+
 #if DEBUG == 1
     printArray();
 #endif
@@ -212,7 +245,7 @@ int main(int argc, char** argv)
     /// Run the program
     time1 = __cilkview_getticks();
 
-    medianFilter(0, 0, n, m);
+    medianFilter(0, 0, m, n);
 
     time2 = __cilkview_getticks();
 
@@ -239,18 +272,52 @@ int main(int argc, char** argv)
 
     outputFile.close();
 
-    printArray();
+    findMedianfor(7, 7, 6);
 
-    /// De-allocate the two dimensional arrays
-    for (int i = 0; i < m; ++i)
-    {
-        delete [] inputArray[i];
-        delete [] outputArray[i];
-    }
-    delete [] inputArray;
-    delete [] outputArray;
+    //printArray();
+
+    freeMem();
 
     return 0;
 }
 
+
+void findMedianfor(int x, int y, int k)
+{
+    vector<int> values;
+
+    int x1;
+    int y1;
+
+    for (int i = x-k; i <= x+k ; ++i)
+    {
+        for (int j = y-k; j <= y+k; ++j)
+        {
+            x1 = i;
+            y1 = j;
+            if (i < 0) x1 = 0;
+            if (i >= m) x1 = m - 1;
+            if (j < 0) y1 = 0;
+            if (j >= n) y1 = n - 1;
+            values.push_back(inputArray[x1][y1]);
+        }
+    }
+
+    /// sort it
+    sort(values.begin(), values.end(), integerSort);
+
+    /// get median and write it in the outputArray
+    //if (values.size() % 2 != 0)
+    outputArray[x][y] = values.at(values.size() / 2);
+    //else
+    //    outputArray[x][y] = (values.at(values.size() / 2 - 1) + values.at(values.size() / 2)) / 2;
+
+//    cout << "Median: " << outputArray[x][y] << endl; 
+
+    for (vector<int>::const_iterator i = values.begin(); i != values.end(); ++i)
+    {
+//        cout << *i << endl;
+    }
+
+}
 
