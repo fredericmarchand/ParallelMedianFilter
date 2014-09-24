@@ -19,8 +19,8 @@ def main(inputFile, outputFile):
         if inLines[i] != outLines[i]:
             errorFound = True;
             print "Lines %d  not equal" % i
-            print "file 1: %s" % inLines[i]
-            print "file 2: %s" % outLines[i]
+#            print "file 1: %s" % inLines[i]
+#            print "file 2: %s" % outLines[i]
 
     if errorFound == False:
         print "Files are identical"

@@ -14,7 +14,6 @@
 using namespace std;
 
 #define DEBUG 0 
-#define DIRECTIONS 8
 
 int m, n, k;
 int **inputArray;
@@ -48,7 +47,6 @@ void findMedianFor(int x, int y, int k)
 
     /// sort it
     sort(values.begin(), values.end(), integerSort);
-
     outputArray[x][y] = values.at(values.size() / 2);
 
 #if DEBUG == 1
@@ -64,6 +62,8 @@ void medianFilter(int x1, int y1, int x2, int y2)
 {
     if ((x2 - x1 == 1) && (y2 - y1 == 1))
     {
+        if (outputArray[x1][y1] != 0)
+            return;
         findMedianFor(x1, y1, k);
     }
     else
