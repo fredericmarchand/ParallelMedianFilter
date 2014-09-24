@@ -3,7 +3,6 @@
  *
  */
 
-
 #include <cilk/cilk.h>
 #include <cilktools/cilkview.h>
 #include <iostream>
@@ -110,6 +109,7 @@ void freeMem()
 int main(int argc, char** argv) 
 {
     char * filepath;
+    char * outputFilepath;
     int time1;
     int time2;
     int par_time;
@@ -119,14 +119,15 @@ int main(int argc, char** argv)
     int x = 0;
     int y = 0;
 
-    if (argc <= 1) 
+    if (argc <= 2) 
     {
         cerr << "The program is missing an argument" << endl; 
         return 1;   /// Error
     }
 
     filepath = argv[1]; 
-    
+    outputFilepath = argv[2];
+
     ifstream input;
     input.open(filepath);
 
@@ -194,7 +195,7 @@ int main(int argc, char** argv)
 
     /// Write to output file
 
-    ofstream outputFile ("temp");
+    ofstream outputFile (outputFilepath);
     if (!outputFile.is_open())
     {
         cerr << "Failed to open output file" << endl;
@@ -205,7 +206,11 @@ int main(int argc, char** argv)
     {
         for (int j = 0; j < n; ++j)
         {
-            outputFile << outputArray[i][j] << " ";
+            outputFile << outputArray[i][j];
+            if ((j + 1) != n)
+            {
+                outputFile << " ";
+            }
         }
         outputFile << endl;
     }
