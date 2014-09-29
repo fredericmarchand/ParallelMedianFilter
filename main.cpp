@@ -1,6 +1,8 @@
 /*
  * MedianFilter.cilk
- *
+ * 
+ * Frederic Marchand
+ * 100817579
  */
 
 #include <cilk/cilk.h>
@@ -19,14 +21,41 @@ int m, n, k;
 int **inputArray;
 int **outputArray;
 
-bool integerSort(int i, int j) 
-{
-    return i < j;
+int partition(int* data, int left, int right) {
+    int i = left;
+    int j = right;
+    int tmp;
+    int pivot = data[(left + right) / 2];
+    while (i <= j) {
+        while (data[i] < pivot) 
+            i++;
+        while (data[j] > pivot) 
+            j--;
+        if (i <= j) {
+            tmp = data[i];
+            data[i] = data[j];
+            data[j] = tmp;
+            i++;
+            j--;
+        }
+    }
+    return i;
+}
+
+void qsort(int* data, int left, int right) {
+    int index = partition(data, left, right);
+    if (left < index - 1)
+        cilk_spawn qsort(data, left, index - 1);
+    if (index < right)
+        qsort(data, index, right);
+    cilk_sync;
 }
 
 void findMedianFor(int x, int y, int k)
 {
-    vector<int> values;
+    int count = ((((y+k)-(y-k)) * ((x+k)-(x-k))) + k * 4) + 1;
+    int values[count];
+    int index = 0;
 
     int x1;
     int y1;
@@ -41,13 +70,13 @@ void findMedianFor(int x, int y, int k)
             if (i >= m) x1 = m - 1;
             if (j < 0) y1 = 0;
             if (j >= n) y1 = n - 1;
-            values.push_back(inputArray[x1][y1]);
+            values[index++] = inputArray[x1][y1];
         }
     }
-
+    
     /// sort it
-    sort(values.begin(), values.end(), integerSort);
-    outputArray[x][y] = values.at(values.size() / 2);
+    qsort(values, 0, count-1);
+    outputArray[x][y] = values[count /2];
 
 #if DEBUG == 1
     for (vector<int>::const_iterator i = values.begin(); i != values.end(); ++i)
